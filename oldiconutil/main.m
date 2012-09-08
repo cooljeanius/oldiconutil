@@ -26,10 +26,10 @@ int main(int argc, const char * argv[])
 		fprintf( stderr, "Error: Syntax is " SYNTAX );
 		return 1;
 	}
-	
+
 	BOOL	convertInPlace = NO;
 	int		nameArgumentPosition = 1;
-	
+
 	if( strcasecmp( argv[1], "--help" ) == 0 )
 	{
 		printf( "Syntax: " SYNTAX "\n" SUMMARY "\n\n" PARAMDESCRIPTIONS "\n\n(c) 2012 by Elgato Systems GmbH, all rights reserved." );
@@ -46,42 +46,42 @@ int main(int argc, const char * argv[])
 			return 4;
 		}
 	}
-	
-	@autoreleasepool
+
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	{
 		NSString		*	inputPath = [NSString stringWithUTF8String: argv[nameArgumentPosition]];
 		NSString		*	outputPath = convertInPlace ? inputPath : [[inputPath stringByDeletingPathExtension] stringByAppendingString: @"_10_5.icns"];
 		BOOL				isDirectory = NO;
-	    
+
 		if( !inputPath || ![[NSFileManager defaultManager] fileExistsAtPath: inputPath isDirectory: &isDirectory] || isDirectory )
 		{
 			fprintf( stderr, "Error: Can't find input file." );
 			return 2;
 		}
-		
+
 		NSData			*	inputData = [NSData dataWithContentsOfFile: inputPath];
 		if( !inputData )
 		{
 			fprintf( stderr, "Error: Can't load input file." );
 			return 3;
 		}
-		
+
 		NSMutableData	*	outputData = [NSMutableData dataWithLength: 0];
 		const char* theBytes = [inputData bytes];
 		NSUInteger	currOffs = 4;	// Skip 'icns'
 		uint32_t	fileSize = NSSwapInt( *(uint32_t*)(theBytes +currOffs) );
 		currOffs += 4;
-		
+
 		while( currOffs < fileSize )
 		{
-			@autoreleasepool
+			NSAutoreleasePool *pool2 = [[NSAutoreleasePool alloc] init];
 			{
 				char		blockType[5] = { 0 };
 				memmove( blockType, theBytes +currOffs, 4 );
 				currOffs += 4;
-				
+
 				printf( "Found block '%s'", blockType );
-				
+
 #if FILTER_TOC_OUT
 				if( strcmp(blockType,"TOC ") == 0 )
 				{
@@ -99,22 +99,22 @@ int main(int argc, const char * argv[])
 					currOffs += blockSize -8;
 					uint32_t	startLong = *(uint32_t*)[currBlockData bytes];
 					BOOL		shouldConvert = (startLong == 0x474E5089);	// PNG data starts with 'âPNG'.
-					
+
 					if( !shouldConvert || strcmp(blockType,"ic08") == 0 || strcmp(blockType,"ic10") == 0
 					   || strcmp(blockType,"ic13") == 0|| strcmp(blockType,"ic09") == 0 || strcmp(blockType,"ic12") == 0
 					   || strcmp(blockType,"ic07") == 0|| strcmp(blockType,"ic11") == 0 || strcmp(blockType,"ic14") == 0 )
 						;
 					else
 						shouldConvert = NO;
-					
+
 #if JUST_PASS_THROUGH
 					shouldConvert = NO;
 #endif
-					
+
 					if( shouldConvert )
 					{
 						printf( "\tConverting PNG to JPEG 2000" );
-						
+
 						NSBitmapImageRep	*	theImage = [[NSBitmapImageRep alloc] initWithData: currBlockData];
 						NSData				*	jp2Data = [theImage representationUsingType: NSJPEG2000FileType properties:
 							[NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:1.0] forKey:NSImageCompressionFactor]];
@@ -131,15 +131,17 @@ int main(int argc, const char * argv[])
 					}
 				}
 			}
+			[pool2 release];
 		}
-		
+
 		[outputData replaceBytesInRange: NSMakeRange(0,0) withBytes: "icns" length: 4];
 		uint32_t theSize = NSSwapInt( (uint32_t)[outputData length] +4 );
 		[outputData replaceBytesInRange: NSMakeRange(4,0) withBytes: &theSize length: 4];
-		 
+
 		printf( "Writing out %ld bytes.", [outputData length] );
 		[outputData writeToFile: outputPath atomically: NO];
 	}
+	[pool release];
     return 0;
 }
 
