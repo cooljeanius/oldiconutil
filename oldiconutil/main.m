@@ -13,8 +13,8 @@
 #define FILTER_TOC_OUT			1
 
 
-#define SYNTAX				"oldiconutil {--help|[--inplace] <icnsFilePath>}"
-#define SUMMARY				"Convert a .icns icon file holding PNG-encoded icons (supported\nin 10.6) to JPEG 2000-encoded icons (supported in 10.5)."
+#define SYNTAX				"oldiconutil {--help|[--inplace] <icnsFilePath>} \n"
+#define SUMMARY				"Convert a .icns icon file holding PNG-encoded icons (supported\nin 10.6) to JPEG 2000-encoded icons (supported in 10.5). \n"
 #define PARAMDESCRIPTIONS	"--help - Show this message.\n" \
 							"icnsFilePath - Path of input icns file. Output file will have _10_5 appended to its name\n"
 
@@ -32,7 +32,7 @@ int main(int argc, const char * argv[])
 
 	if( strcasecmp( argv[1], "--help" ) == 0 )
 	{
-		printf( "Syntax: " SYNTAX "\n" SUMMARY "\n\n" PARAMDESCRIPTIONS "\n\n(c) 2012 by Elgato Systems GmbH, all rights reserved." );
+		printf( "Syntax: " SYNTAX "\n" SUMMARY "\n\n" PARAMDESCRIPTIONS "\n\n(c) 2012 by Elgato Systems GmbH, all rights reserved. \n" );
 		return 0;
 	}
 	else if( strcasecmp( argv[1], "--inplace" ) == 0 )
@@ -55,14 +55,14 @@ int main(int argc, const char * argv[])
 
 		if( !inputPath || ![[NSFileManager defaultManager] fileExistsAtPath: inputPath isDirectory: &isDirectory] || isDirectory )
 		{
-			fprintf( stderr, "Error: Can't find input file." );
+			fprintf( stderr, "Error: Can't find input file. \n" );
 			return 2;
 		}
 
 		NSData			*	inputData = [NSData dataWithContentsOfFile: inputPath];
 		if( !inputData )
 		{
-			fprintf( stderr, "Error: Can't load input file." );
+			fprintf( stderr, "Error: Can't load input file. \n" );
 			return 3;
 		}
 
@@ -80,13 +80,13 @@ int main(int argc, const char * argv[])
 				memmove( blockType, theBytes +currOffs, 4 );
 				currOffs += 4;
 
-				printf( "Found block '%s'", blockType );
+				printf( "Found block '%s' \n", blockType );
 
 #if FILTER_TOC_OUT
 				if( strcmp(blockType,"TOC ") == 0 )
 				{
 					uint32_t	blockSize = NSSwapInt( *(uint32_t*)(theBytes +currOffs) );
-					printf( "\tSkipping %d (+4) bytes.", blockSize );
+					printf( "\tSkipping %d (+4) bytes. \n", blockSize );
 					currOffs += blockSize -4;
 				}
 				else
@@ -113,7 +113,7 @@ int main(int argc, const char * argv[])
 
 					if( shouldConvert )
 					{
-						printf( "\tConverting PNG to JPEG 2000" );
+						printf( "\tConverting PNG to JPEG 2000 \n" );
 
 						NSBitmapImageRep	*	theImage = [[NSBitmapImageRep alloc] initWithData: currBlockData];
 						NSData				*	jp2Data = [theImage representationUsingType: NSJPEG2000FileType properties:
@@ -124,7 +124,7 @@ int main(int argc, const char * argv[])
 					}
 					else
 					{
-						printf( "\tCopying data verbatim." );
+						printf( "\tCopying data verbatim. \n" );
 						blockSize = NSSwapInt( blockSize );
 						[outputData appendBytes: &blockSize length: 4];	// Copy size.
 						[outputData appendData: currBlockData];
@@ -138,7 +138,7 @@ int main(int argc, const char * argv[])
 		uint32_t theSize = NSSwapInt( (uint32_t)[outputData length] +4 );
 		[outputData replaceBytesInRange: NSMakeRange(4,0) withBytes: &theSize length: 4];
 
-		printf( "Writing out %ld bytes.", [outputData length] );
+		printf( "Writing out %ld bytes. \n", [outputData length] );
 		[outputData writeToFile: outputPath atomically: NO];
 	}
 	[pool release];
