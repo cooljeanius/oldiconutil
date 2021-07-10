@@ -185,6 +185,7 @@ int main(int argc, const char * argv[])
 							uint32_t				newSize = NSSwapInt( (uint32_t) [jp2Data length] + 8 );
 							[outputData appendBytes: &newSize length: 4];	// Write size.
 							[outputData appendData: jp2Data];
+                            [theImage release];
 						}
 						else
 							printf( "\tData is PNG\n" );
@@ -219,6 +220,7 @@ int main(int argc, const char * argv[])
 		}
 	}
 	[pool release];
+    (void)compressionType;
     return 0;
 }
 
