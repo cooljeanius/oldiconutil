@@ -16,18 +16,18 @@ in the same directory.
 If you pass the `--inplace` option, it will replace the given file with the converted file
 instead of creating a new, renamed icon file.
 
-Syntax: oldiconutil {--help|[--inplace [--compression <compression>]|--list] <icnsFilePath>}
+Syntax: `oldiconutil {--help|[--inplace [--compression <compression>]|--list] <icnsFilePath>}`
 Convert a .icns icon file holding PNG-encoded icons (supported
 in 10.6) to JPEG 2000-encoded icons (supported in 10.5).
 
---help - Show this message.
+`--help` - Show this message.
 
-icnsFilePath - Path of input icns file. Output file will have _10_5 appended to its name,
-unless the --inplace option is given, in which case it'll replace the input file.
+icnsFilePath - Path of input icns file. Output file will have \_10\_5 appended to its name,
+unless the `--inplace` option is given, in which case it'll replace the input file.
 
-If --list is given, oldiconutil will simply print a description of the file.
+If `--list` is given, oldiconutil will simply print a description of the file.
 
---compression - One of the compression formats of tif, bmp, gif, jpg, png, jp2, immediately
+`--compression` - One of the compression formats of tif, bmp, gif, jpg, png, jp2, immediately
 followed by a number from 0.0 (best compression) through 1.0 (no compression) indicating how
 much to compress. If you do not provide a format, the default is jp2 (JPEG 2000), if you do
 not specify a compression factor, it defaults to 1.0 (uncompressed). Note not all formats
